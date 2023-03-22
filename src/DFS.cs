@@ -9,6 +9,7 @@ class DFS{
     public DFS(int v)
     {
         V = v;
+        adj = new List<int>[v];
         for (int i = 0; i < v; ++i)
             adj[i] = new List<int>();
     }
