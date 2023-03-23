@@ -10,6 +10,7 @@ namespace ChumBucketProject
         public Printer printer;
         public Parser parser;
         public Game game;
+        public Solver solver;
         public void InitNewAppHandler(DataGridView dataGridView)
         {
             gridHandler = new GridHandler(dataGridView);
@@ -31,12 +32,17 @@ namespace ChumBucketProject
             }
         }
 
-        private void ShowMessageBoxImpossiblePath()
+        public void solveMap(string method, TextReader readerSolver, DataGridView dgv)
+        {
+            solver = new Solver(method, readerSolver, dgv);
+        }
+
+        public void ShowMessageBoxImpossiblePath()
         {
             MessageBox.Show("This path is impossible to solve");
         }
 
-        private void ShowMessageBoxSolved()
+        public void ShowMessageBoxSolved()
         {
             MessageBox.Show("This path is already solved");
         }

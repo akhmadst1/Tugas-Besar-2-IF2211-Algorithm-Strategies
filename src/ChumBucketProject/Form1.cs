@@ -14,10 +14,11 @@ namespace ChumBucketProject
     public partial class Form1 : Form
     {
         private AppHandler appHandler;
-        private Solver solver;
         private TextReader readerSolver;
         private int seconds;
         public bool isValid = false;
+        public bool isSolvedBFS = false;
+        public bool isSolvedDFS = false;
         public int numOfTreasure = 0;
 
         public Form1()
@@ -116,7 +117,7 @@ namespace ChumBucketProject
             }
             else if (map == "X")
             {
-                dataGridView1[column, row].Value = " ";
+                dataGridView1[column, row].Value = "";
                 dataGridView1[column, row].Style.BackColor = Color.Black;
             }
         }
@@ -160,7 +161,18 @@ namespace ChumBucketProject
                     numRows++;
                 }
                 InitializeGrid(numRows, numCols, charMap);
-                reader.Dispose();
+            }
+            isSolvedBFS = false;
+            isSolvedDFS = false;
+        }
+        public void clearBackColor()
+        {
+            for (int i = 0; i < dataGridView1.RowCount; i++)
+            {
+                for (int j = 0; j < dataGridView1.ColumnCount; j++)
+                {
+                    dataGridView1[j, i].Style.BackColor = Color.White;
+                }
             }
         }
 
@@ -173,7 +185,36 @@ namespace ChumBucketProject
                 {
                     method = "DFS";
                 }
-                Solver solver = new Solver(method, readerSolver);
+
+                if (method == "BFS" && isSolvedBFS)
+                {
+                    appHandler.ShowMessageBoxSolved();
+                }
+                else if (method == "BFS" && !isSolvedBFS)
+                {
+                    if (isSolvedDFS)
+                    {
+                        clearBackColor();
+                    }
+                    isSolvedBFS = true;
+                    isSolvedDFS = false;
+                    appHandler.solveMap(method, readerSolver, dataGridView1);
+                }
+
+                else if (method == "DFS" && isSolvedDFS)
+                {
+                    appHandler.ShowMessageBoxSolved();
+                }
+                else if (method == "DFS" && !isSolvedDFS)
+                {
+                    if (isSolvedBFS)
+                    {
+                        clearBackColor();
+                    }
+                    isSolvedBFS = false;
+                    isSolvedDFS = true;
+                    appHandler.solveMap(method, readerSolver, dataGridView1);
+                }
             }
             else
             {
