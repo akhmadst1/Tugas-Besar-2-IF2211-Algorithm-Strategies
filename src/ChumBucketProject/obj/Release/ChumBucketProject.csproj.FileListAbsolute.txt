@@ -1,0 +1,11 @@
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\bin\Release\ChumBucketProject.exe.config
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\bin\Release\ChumBucketProject.exe
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\bin\Release\ChumBucketProject.pdb
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\obj\Release\ChumBucketProject.csproj.AssemblyReference.cache
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\obj\Release\ChumBucketProject.csproj.SuggestedBindingRedirects.cache
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\obj\Release\ChumBucketProject.Form1.resources
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\obj\Release\ChumBucketProject.Properties.Resources.resources
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\obj\Release\ChumBucketProject.csproj.GenerateResource.cache
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\obj\Release\ChumBucketProject.csproj.CoreCompileInputs.cache
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\obj\Release\ChumBucketProject.exe
+C:\Users\Lenovo\source\repos\blixa-rd\Tubes2_ChumBucket\src\ChumBucketProject\obj\Release\ChumBucketProject.pdb

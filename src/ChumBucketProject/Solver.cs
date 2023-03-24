@@ -20,17 +20,22 @@ namespace ChumBucketProject
         private bool isBottom;
         private bool isLeft;
         private bool isRight;
+        private bool stepByStep = false;
         private List<string[]> path;
         private List<List<int>> adj;
         private int[] startIndex;
         private List<List<int>> treasureIndex;
         private List<string> trackPath = new List<string>();
+        private List<string> trackPathBFS = new List<string>();
         private Queue<int[]> queueToVisit = new Queue<int[]>();
+        private Stack<int[]> visitedIndex = new Stack<int[]>();
+        private Dictionary<int, List<string>> tracker = new Dictionary<int, List<string>>();
 
         public Solver() { }
-        public Solver(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker)
+        public Solver(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker, bool showSteps)
         {
             helper(readerSolver, dgv);
+            stepByStep = showSteps;
             if (method == "BFS")
             {
                 BFSSolver(dgv, pathTracker);
@@ -44,94 +49,120 @@ namespace ChumBucketProject
         // -------------------------[BFS ALGORITHM]----------------------------------
         public void BFSSolver(DataGridView dgv, List<string> pathTracker)
         {
+            for (int i = 0; i < numRows; i++)
+            {
+                for (int j = 0; j < numCols; j++)
+                {
+                    if (path[i][j] != "X")
+                    {
+                        int indexing = i*numCols + j;
+                        List<string> init = new List<string>();
+                        tracker.Add(indexing, init);
+                    }
+                }
+            }
+
             queueToVisit.Enqueue(startIndex);
             dgv[startIndex[1], startIndex[0]].Style.BackColor = GetColor(adj[startIndex[0]][startIndex[1]]);
-            dgv.Refresh();
-            Thread.Sleep(700);
+            if (stepByStep)
+            {
+                dgv.Refresh();
+                Thread.Sleep(700);
+            }
             adj[startIndex[0]][startIndex[1]]++;
-            findPathBFS(startIndex, dgv, pathTracker);
-        }
 
-        public void findPathBFS(int[] currentIndex, DataGridView dgv, List<string> pathTracker)
-        {
-            if (treasureCount != 0)
-            {
-                trackBFS(visitNeighbor(currentIndex[0], currentIndex[1]), dgv, pathTracker);
-            }
-            foreach (string s in trackPath)
-            {
-                pathTracker.Add(s);
-            }
-        }
-
-        public void trackBFS(int[] currentIndex, DataGridView dgv, List<string> pathTracker)
-        {
+            int[] currentIndex = startIndex;
             while (queueToVisit.Count != 0 && treasureCount != 0)
             {
                 currentIndex = queueToVisit.Dequeue();
-                checkPosition(currentIndex);
-
-                if (isTop)
+                visitedIndex.Push(currentIndex);
+                findPathBFS(currentIndex, dgv, pathTracker, visitedIndex);
+            }
+            while (queueToVisit.Count == 0 && treasureCount != 0)
+            {
+                //backtrack
+                //currentIndex = visitedIndex.Pop();
+                //dgv[visitedIndex.Peek()[1], visitedIndex.Peek()[0]].Style.BackColor = GetColor(adj[visitedIndex.Peek()[0]][visitedIndex.Peek()[1]]);
+                //dgv.Refresh();
+                //Thread.Sleep(700);
+                //backtrackDFSHandler(currentIndex, visitedIndex);
+                //currentIndex = visitedIndex.Peek();
+                //findPathDFS(currentIndex, dgv, pathTracker, visitedIndex);
+            }
+            if (treasureCount == 0)
+            {
+                //List<string> finalPath = tracker[visitedIndex.Peek()];
+                foreach (string c in tracker[arrToKey(currentIndex)])
                 {
-                    if (isLeft)
-                    {
-                        checkRight(currentIndex, dgv);
-                        checkDown(currentIndex, dgv);
-                    }
-                    else if (isRight)
-                    {
-                        checkDown(currentIndex, dgv);
-                        checkLeft(currentIndex, dgv);
-                    }
-                    else
-                    {
-                        checkRight(currentIndex, dgv);
-                        checkDown(currentIndex, dgv);
-                        checkLeft(currentIndex, dgv);
-                    }
+                    pathTracker.Add(c);
                 }
+            }
+        }
 
-                else if (isBottom)
+        public void findPathBFS(int[] currentIndex, DataGridView dgv, List<string> pathTracker, Stack<int[]> visitedIndex)
+        {
+            checkPosition(currentIndex);
+            int currentKey = arrToKey(currentIndex);
+            if (isTop)
+            {
+                if (isLeft)
                 {
-                    if (isLeft)
-                    {
-                        checkRight(currentIndex, dgv);
-                        checkUp(currentIndex, dgv);
-                    }
-                    else if (isRight)
-                    {
-                        checkLeft(currentIndex, dgv);
-                        checkUp(currentIndex, dgv);
-                    }
-                    else
-                    {
-                        checkRight(currentIndex, dgv);
-                        checkLeft(currentIndex, dgv);
-                        checkUp(currentIndex, dgv);
-                    }
+                    checkRight(currentIndex, dgv, tracker[currentKey]);
+                    checkDown(currentIndex, dgv, tracker[currentKey]);
                 }
-
+                else if (isRight)
+                {
+                    checkDown(currentIndex, dgv, tracker[currentKey]);
+                    checkLeft(currentIndex, dgv, tracker[currentKey]);
+                }
                 else
                 {
-                    if (isLeft)
-                    {
-                        checkRight(currentIndex, dgv);
-                        checkDown(currentIndex, dgv);
-                        checkUp(currentIndex, dgv);
-                    }
-                    else if (isRight)
-                    {
-                        checkDown(currentIndex, dgv);
-                        checkLeft(currentIndex, dgv);
-                        checkUp(currentIndex, dgv);
-                    }
-                    else
-                    {
-                        checkRight(currentIndex, dgv);
-                        checkDown(currentIndex, dgv);
-                        checkLeft(currentIndex, dgv);
-                        checkUp(currentIndex, dgv);
-                    }
+                    checkRight(currentIndex, dgv, tracker[currentKey]);
+                    checkDown(currentIndex, dgv, tracker[currentKey]);
+                    checkLeft(currentIndex, dgv, tracker[currentKey]);
+                }
+            }
+
+            else if (isBottom)
+            {
+                if (isLeft)
+                {
+                    checkRight(currentIndex, dgv, tracker[currentKey]);
+                    checkUp(currentIndex, dgv, tracker[currentKey]);
+                }
+                else if (isRight)
+                {
+                    checkLeft(currentIndex, dgv, tracker[currentKey]);
+                    checkUp(currentIndex, dgv, tracker[currentKey]);
+                }
+                else
+                {
+                    checkRight(currentIndex, dgv, tracker[currentKey]);
+                    checkLeft(currentIndex, dgv, tracker[currentKey]);
+                    checkUp(currentIndex, dgv, tracker[currentKey]);
+                }
+            }
+
+            else
+            {
+                if (isLeft)
+                {
+                    checkRight(currentIndex, dgv, tracker[currentKey]);
+                    checkDown(currentIndex, dgv, tracker[currentKey]);
+                    checkUp(currentIndex, dgv, tracker[currentKey]);
+                }
+                else if (isRight)
+                {
+                    checkDown(currentIndex, dgv, tracker[currentKey]);
+                    checkLeft(currentIndex, dgv, tracker[currentKey]);
+                    checkUp(currentIndex, dgv, tracker[currentKey]);
+                }
+                else
+                {
+                    checkRight(currentIndex, dgv, tracker[currentKey]);
+                    checkDown(currentIndex, dgv, tracker[currentKey]);
+                    checkLeft(currentIndex, dgv, tracker[currentKey]);
+                    checkUp(currentIndex, dgv, tracker[currentKey]);
                 }
             }
         }
@@ -141,10 +172,12 @@ namespace ChumBucketProject
         {
             queueToVisit.Enqueue(startIndex);
             dgv[startIndex[1], startIndex[0]].Style.BackColor = GetColor(adj[startIndex[0]][startIndex[1]]);
-            dgv.Refresh();
-            Thread.Sleep(700);
+            if (stepByStep)
+            {
+                dgv.Refresh();
+                Thread.Sleep(700);
+            }
             adj[startIndex[0]][startIndex[1]]++;
-            Stack<int[]> visitedIndex = new Stack<int[]>();
             int[] currentIndex;
             while (queueToVisit.Count != 0 && treasureCount != 0)
             {
@@ -157,8 +190,11 @@ namespace ChumBucketProject
                 //backtrack
                 currentIndex = visitedIndex.Pop();
                 dgv[visitedIndex.Peek()[1], visitedIndex.Peek()[0]].Style.BackColor = GetColor(adj[visitedIndex.Peek()[0]][visitedIndex.Peek()[1]]);
-                dgv.Refresh();
-                Thread.Sleep(700);
+                if (stepByStep)
+                {
+                        dgv.Refresh();
+                    Thread.Sleep(700);
+                }
                 backtrackDFSHandler(currentIndex, visitedIndex);
                 currentIndex = visitedIndex.Peek();
                 findPathDFS(currentIndex, dgv, pathTracker, visitedIndex);
@@ -250,41 +286,81 @@ namespace ChumBucketProject
 
         // ---------------------------[MATRIX CHECKER]---------------------------
         // BFS Checker
-        public void checkRight(int[] currentIndex, DataGridView dgv)
+        public void checkRight(int[] currentIndex, DataGridView dgv, List<string> oldPath)
         {
             if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
             {
-                trackPath.Add("Right");
+                int[] newIndex = new int[2];
+                newIndex[0] = currentIndex[0];
+                newIndex[1] = currentIndex[1] + 1;
+
+                int currentKey = arrToKey(currentIndex);
+                int newKey = arrToKey(newIndex);
+
+                List<string> newPathRight = oldPath;
+                newPathRight.Add("Right");
+                tracker[newKey] = newPathRight;
+
                 checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
                 nodeVisited++;
             }
         }
 
-        public void checkDown(int[] currentIndex, DataGridView dgv)
+        public void checkDown(int[] currentIndex, DataGridView dgv, List<string> oldPath)
         {
-            if (adj[currentIndex[0]+1][currentIndex[1]] == 1)
+            if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
             {
-                trackPath.Add("Down");
+                int[] newIndex = new int[2];
+                newIndex[0] = currentIndex[0] + 1;
+                newIndex[1] = currentIndex[1];
+
+                int currentKey = arrToKey(currentIndex);
+                int newKey = arrToKey(newIndex);
+
+                List<string> newPathDown = oldPath;
+                newPathDown.Add("Down");
+                tracker[newKey] = newPathDown;
+
                 checkNeighbor(dgv, currentIndex[0]+1, currentIndex[1]);
                 nodeVisited++;
             }
         }
 
-        public void checkLeft(int[] currentIndex, DataGridView dgv)
+        public void checkLeft(int[] currentIndex, DataGridView dgv, List<string> oldPath)
         {
-            if (adj[currentIndex[0]][currentIndex[1]-1] == 1)
+            if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
             {
-                trackPath.Add("Left");
+                int[] newIndex = new int[2];
+                newIndex[0] = currentIndex[0];
+                newIndex[1] = currentIndex[1] - 1;
+
+                int currentKey = arrToKey(currentIndex);
+                int newKey = arrToKey(newIndex);
+
+                List<string> newPathLeft = oldPath;
+                newPathLeft.Add("Left");
+                tracker[newKey] = newPathLeft;
+
                 checkNeighbor(dgv, currentIndex[0], currentIndex[1]-1);
                 nodeVisited++;
             }
         }
 
-        public void checkUp(int[] currentIndex, DataGridView dgv)
+        public void checkUp(int[] currentIndex, DataGridView dgv, List<string> oldPath)
         {
-            if (adj[currentIndex[0]-1][currentIndex[1]] == 1)
+            if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
             {
-                trackPath.Add("Up");
+                int[] newIndex = new int[2];
+                newIndex[0] = currentIndex[0] - 1;
+                newIndex[1] = currentIndex[1];
+
+                int currentKey = arrToKey(currentIndex);
+                int newKey = arrToKey(newIndex);
+
+                List<string> newPathUp = oldPath;
+                newPathUp.Add("Up");
+                tracker[newKey] = newPathUp;
+
                 checkNeighbor(dgv, currentIndex[0]-1, currentIndex[1]);
                 nodeVisited++;
             }
@@ -471,13 +547,21 @@ namespace ChumBucketProject
             }
         }
 
+        public int arrToKey(int[] index)
+        {
+            return (index[0]*numCols + index[1]);
+        }
+
 
         // ---------------------------[NEIGHBORHOOD]---------------------------
         public void checkNeighbor(DataGridView dgv, int row, int col)
         {
             dgv[col, row].Style.BackColor = GetColor(adj[row][col]);
-            dgv.Refresh();
-            Thread.Sleep(700);
+            if (stepByStep)
+            {
+                dgv.Refresh();
+                Thread.Sleep(700);
+            }
             adj[row][col]++;
             queueToVisit.Enqueue(visitNeighbor(row, col));
             checkTreasure(row, col);
@@ -604,6 +688,11 @@ namespace ChumBucketProject
                 indices.Add(index);
             }
             return indices;
+        }
+
+        public int getSteps()
+        {
+            return nodeVisited;
         }
     }
 }

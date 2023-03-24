@@ -32,7 +32,7 @@ class BFS
 
         while (queue.Count != 0) 
         {
-            s = queue.Dequeue(); n
+            s = queue.Dequeue();
 
             Console.Write(s + " "); 
 
@@ -47,3 +47,4 @@ class BFS
             }
         }
     }
+}

@@ -20,7 +20,6 @@ namespace ChumBucketProject
 
         public void GetNewGrid(TextReader reader, int numRows, int numCols)
         {
-            //gridHandler.ClearGrid()
             parser = new Parser(reader);
             if (parser.TryGetFile(numRows, numCols, out Game newGame))
             {
@@ -33,9 +32,14 @@ namespace ChumBucketProject
             }
         }
 
-        public void solveMap(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker)
+        public void solveMap(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker, bool showSteps)
         {
-            solver = new Solver(method, readerSolver, dgv, pathTracker);
+            solver = new Solver(method, readerSolver, dgv, pathTracker, showSteps);
+        }
+
+        public int getSteps()
+        {
+            return solver.getSteps();
         }
 
         public void ShowMessageBoxImpossiblePath()

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -15,12 +16,14 @@ namespace ChumBucketProject
     {
         private AppHandler appHandler;
         private TextReader readerSolver;
-        private int seconds;
         public bool isValid = false;
         public bool isSolvedBFS = false;
         public bool isSolvedDFS = false;
         public int numOfTreasure = 0;
+        private int numOfNodes = 0;
         public List<string> pathTracker = new List<string>();
+        public bool showSteps = false;
+        private List<string[]> fullCharMap = new List<string[]>();
 
         public Form1()
         {
@@ -102,16 +105,19 @@ namespace ChumBucketProject
         {
             if (map == "K")
             {
+                numOfNodes++;
                 dataGridView1[column, row].Value = "S";
                 dataGridView1[column, row].Style.BackColor = Color.White;
             }
             else if (map == "R")
             {
+                numOfNodes++;
                 dataGridView1[column, row].Value = " ";
                 dataGridView1[column, row].Style.BackColor = Color.White;
             }
             else if (map == "T")
             {
+                numOfNodes++;
                 dataGridView1[column, row].Value = "T";
                 dataGridView1[column, row].Style.BackColor = Color.White;
                 numOfTreasure++;
@@ -158,6 +164,7 @@ namespace ChumBucketProject
                     {
                         numCols = lineElements.Length;
                     }
+                    fullCharMap.Add(lineElements);
                     charMap.AddRange(lineElements);
                     numRows++;
                 }
@@ -165,6 +172,7 @@ namespace ChumBucketProject
             }
             isSolvedBFS = false;
             isSolvedDFS = false;
+            pictureBox1.Dispose();
         }
         public void clearBackColor()
         {
@@ -172,13 +180,21 @@ namespace ChumBucketProject
             {
                 for (int j = 0; j < dataGridView1.ColumnCount; j++)
                 {
-                    dataGridView1[j, i].Style.BackColor = Color.White;
+                    if (fullCharMap[i][j] != "X")
+                    {
+                        dataGridView1[j, i].Style.BackColor = Color.White;
+                    }
                 }
             }
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+            label9.ResetText();
+            if (checkBox2.Checked)
+            {
+                showSteps = true;
+            }
             if (isValid)
             {
                 string method = "BFS";
@@ -186,7 +202,6 @@ namespace ChumBucketProject
                 {
                     method = "DFS";
                 }
-
                 if (method == "BFS" && isSolvedBFS)
                 {
                     appHandler.ShowMessageBoxSolved();
@@ -199,7 +214,13 @@ namespace ChumBucketProject
                     }
                     isSolvedBFS = true;
                     isSolvedDFS = false;
-                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker);
+                    Stopwatch sw = Stopwatch.StartNew();
+                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker, showSteps);
+                    sw.Stop();
+                    label8.Text = "Execution Time: " + sw.ElapsedMilliseconds.ToString() + " ms";
+                    label7.Text = "Nodes: " + numOfNodes;
+                    numOfNodes = 0;
+                    label6.Text = "Steps: " + appHandler.getSteps();
                 }
 
                 else if (method == "DFS" && isSolvedDFS)
@@ -214,12 +235,19 @@ namespace ChumBucketProject
                     }
                     isSolvedBFS = false;
                     isSolvedDFS = true;
-                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker);
+                    Stopwatch sw = Stopwatch.StartNew();
+                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker, showSteps);
+                    sw.Stop();
+                    label8.Text = "Execution Time: " + sw.ElapsedMilliseconds.ToString() + " ms";
+                    label7.Text = "Nodes: " + numOfNodes;
+                    numOfNodes = 0;
+                    label6.Text = "Steps: " + appHandler.getSteps();
                 }
                 foreach (string c in pathTracker)
                 {
-                    textBox1.Text += c + " ";
+                    label9.Text += c + "  ";
                 }
+                pathTracker.Clear();
             }
             else
             {
