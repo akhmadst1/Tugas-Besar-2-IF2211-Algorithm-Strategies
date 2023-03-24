@@ -8,7 +8,6 @@ Tugas Besar 2 Strategi Algoritma - Pengaplikasian Algoritma BFS dan DFS dalam Me
 * [Cara Kompilasi Program](#cara-kompilasi-program)
 * [Cara Menjalankan Program](#cara-menjalankan-program)
 * [Authors](#authors)
-* [Link Demo Program](#link-demo-program)
 
 ## Deskripsi Singkat Program
 
