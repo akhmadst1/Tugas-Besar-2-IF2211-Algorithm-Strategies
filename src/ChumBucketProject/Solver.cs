@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.SqlServer.Server;
 using System.Threading;
+using System.Collections;
 
 namespace ChumBucketProject
 {
@@ -21,6 +22,7 @@ namespace ChumBucketProject
         private bool isLeft;
         private bool isRight;
         private bool stepByStep = false;
+        private bool TSP = false;
         private List<string[]> path;
         private List<List<int>> adj;
         private int[] startIndex;
@@ -32,10 +34,11 @@ namespace ChumBucketProject
         private Dictionary<int, List<string>> tracker = new Dictionary<int, List<string>>();
 
         public Solver() { }
-        public Solver(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker, bool showSteps)
+        public Solver(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker, bool showSteps, bool showTSP)
         {
             helper(readerSolver, dgv);
             stepByStep = showSteps;
+            TSP = showTSP;
             if (method == "BFS")
             {
                 BFSSolver(dgv, pathTracker);
@@ -78,23 +81,28 @@ namespace ChumBucketProject
                 visitedIndex.Push(currentIndex);
                 findPathBFS(currentIndex, dgv, pathTracker, visitedIndex);
             }
-            while (queueToVisit.Count == 0 && treasureCount != 0)
-            {
-                //backtrack
-                //currentIndex = visitedIndex.Pop();
-                //dgv[visitedIndex.Peek()[1], visitedIndex.Peek()[0]].Style.BackColor = GetColor(adj[visitedIndex.Peek()[0]][visitedIndex.Peek()[1]]);
-                //dgv.Refresh();
-                //Thread.Sleep(700);
-                //backtrackDFSHandler(currentIndex, visitedIndex);
-                //currentIndex = visitedIndex.Peek();
-                //findPathDFS(currentIndex, dgv, pathTracker, visitedIndex);
-            }
             if (treasureCount == 0)
             {
                 //List<string> finalPath = tracker[visitedIndex.Peek()];
                 foreach (string c in tracker[arrToKey(currentIndex)])
                 {
                     pathTracker.Add(c);
+                }
+            }
+            if (TSP)
+            {
+                while (queueToVisit.Count != 0)
+                {
+                    currentIndex = queueToVisit.Dequeue();
+                    visitedIndex.Push(currentIndex);
+                    findPathBFS(currentIndex, dgv, pathTracker, visitedIndex);
+                }
+                List<string> reversedList = tracker[arrToKey(currentIndex)];
+                reversedList.Reverse();
+                foreach (string c in reversedList)
+                {
+                    string d = opposite(c);
+                    pathTracker.Add(d);
                 }
             }
         }
@@ -178,7 +186,7 @@ namespace ChumBucketProject
                 Thread.Sleep(700);
             }
             adj[startIndex[0]][startIndex[1]]++;
-            int[] currentIndex;
+            int[] currentIndex = startIndex;
             while (queueToVisit.Count != 0 && treasureCount != 0)
             {
                 currentIndex = queueToVisit.Dequeue();
@@ -192,7 +200,7 @@ namespace ChumBucketProject
                 dgv[visitedIndex.Peek()[1], visitedIndex.Peek()[0]].Style.BackColor = GetColor(adj[visitedIndex.Peek()[0]][visitedIndex.Peek()[1]]);
                 if (stepByStep)
                 {
-                        dgv.Refresh();
+                    dgv.Refresh();
                     Thread.Sleep(700);
                 }
                 backtrackDFSHandler(currentIndex, visitedIndex);
@@ -204,6 +212,34 @@ namespace ChumBucketProject
                 foreach (string s in trackPath)
                 {
                     pathTracker.Add(s);
+                }
+            }
+            if (TSP)
+            {
+                while (queueToVisit.Count != 0 && currentIndex != startIndex)
+                {
+                    currentIndex = queueToVisit.Dequeue();
+                    visitedIndex.Push(currentIndex);
+                    findPathDFS(currentIndex, dgv, pathTracker, visitedIndex);
+                }
+                while (queueToVisit.Count == 0 && currentIndex != startIndex)
+                {
+                    //backtrack
+                    currentIndex = visitedIndex.Pop();
+                    dgv[visitedIndex.Peek()[1], visitedIndex.Peek()[0]].Style.BackColor = GetColor(adj[visitedIndex.Peek()[0]][visitedIndex.Peek()[1]]);
+                    if (stepByStep)
+                    {
+                        dgv.Refresh();
+                        Thread.Sleep(700);
+                    }
+                    backtrackDFSHandler(currentIndex, visitedIndex);
+                    currentIndex = visitedIndex.Peek();
+                    findPathDFS(currentIndex, dgv, pathTracker, visitedIndex);
+                }
+                pathTracker.RemoveRange(0, (trackPath.Count / 2));
+                foreach (string c in trackPath)
+                {
+                    pathTracker.Add(c);
                 }
             }
         }
@@ -693,6 +729,26 @@ namespace ChumBucketProject
         public int getSteps()
         {
             return nodeVisited;
+        }
+
+        public string opposite(string s)
+        {
+            if (s == "Right")
+            {
+                return "Left";
+            }
+            else if (s == "Left")
+            {
+                return "Right";
+            }
+            else if (s == "Up")
+            {
+                return "Down";
+            }
+            else
+            {
+                return "Up";
+            }
         }
     }
 }

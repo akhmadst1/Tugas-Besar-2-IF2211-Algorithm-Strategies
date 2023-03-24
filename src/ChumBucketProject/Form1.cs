@@ -16,13 +16,14 @@ namespace ChumBucketProject
     {
         private AppHandler appHandler;
         private TextReader readerSolver;
-        public bool isValid = false;
-        public bool isSolvedBFS = false;
-        public bool isSolvedDFS = false;
-        public int numOfTreasure = 0;
+        private bool isValid = false;
+        private bool isSolvedBFS = false;
+        private bool isSolvedDFS = false;
+        private bool showSteps = false;
+        private bool showTSP = false;
+        private int numOfTreasure = 0;
         private int numOfNodes = 0;
-        public List<string> pathTracker = new List<string>();
-        public bool showSteps = false;
+        private List<string> pathTracker = new List<string>();
         private List<string[]> fullCharMap = new List<string[]>();
 
         public Form1()
@@ -195,6 +196,10 @@ namespace ChumBucketProject
             {
                 showSteps = true;
             }
+            if (checkBox1.Checked)
+            {
+                showTSP = true;
+            }
             if (isValid)
             {
                 string method = "BFS";
@@ -215,7 +220,7 @@ namespace ChumBucketProject
                     isSolvedBFS = true;
                     isSolvedDFS = false;
                     Stopwatch sw = Stopwatch.StartNew();
-                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker, showSteps);
+                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker, showSteps, showTSP);
                     sw.Stop();
                     label8.Text = "Execution Time: " + sw.ElapsedMilliseconds.ToString() + " ms";
                     label7.Text = "Nodes: " + numOfNodes;
@@ -236,7 +241,7 @@ namespace ChumBucketProject
                     isSolvedBFS = false;
                     isSolvedDFS = true;
                     Stopwatch sw = Stopwatch.StartNew();
-                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker, showSteps);
+                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker, showSteps, showTSP);
                     sw.Stop();
                     label8.Text = "Execution Time: " + sw.ElapsedMilliseconds.ToString() + " ms";
                     label7.Text = "Nodes: " + numOfNodes;

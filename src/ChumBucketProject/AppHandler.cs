@@ -32,9 +32,9 @@ namespace ChumBucketProject
             }
         }
 
-        public void solveMap(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker, bool showSteps)
+        public void solveMap(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker, bool showSteps, bool showTSP)
         {
-            solver = new Solver(method, readerSolver, dgv, pathTracker, showSteps);
+            solver = new Solver(method, readerSolver, dgv, pathTracker, showSteps, showTSP);
         }
 
         public int getSteps()
