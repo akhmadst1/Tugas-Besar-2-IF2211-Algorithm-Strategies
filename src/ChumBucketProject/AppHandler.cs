@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace ChumBucketProject
@@ -32,9 +33,9 @@ namespace ChumBucketProject
             }
         }
 
-        public void solveMap(string method, TextReader readerSolver, DataGridView dgv)
+        public void solveMap(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker)
         {
-            solver = new Solver(method, readerSolver, dgv);
+            solver = new Solver(method, readerSolver, dgv, pathTracker);
         }
 
         public void ShowMessageBoxImpossiblePath()

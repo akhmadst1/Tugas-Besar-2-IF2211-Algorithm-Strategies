@@ -14,6 +14,7 @@ namespace ChumBucketProject
     {
         private int numRows = 0;
         private int numCols = 0;
+        private int nodeVisited = 0;
         private int treasureCount = 0;
         private bool isTop;
         private bool isBottom;
@@ -22,41 +23,49 @@ namespace ChumBucketProject
         private List<string[]> path;
         private List<List<int>> adj;
         private int[] startIndex;
-        private int startRow = 0;
-        private int startCol = 0;
         private List<List<int>> treasureIndex;
-        private List<string> pathTracker = new List<string>();
+        private List<string> trackPath = new List<string>();
         private Queue<int[]> queueToVisit = new Queue<int[]>();
 
         public Solver() { }
-        public Solver(string method, TextReader readerSolver, DataGridView dgv)
+        public Solver(string method, TextReader readerSolver, DataGridView dgv, List<string> pathTracker)
         {
             helper(readerSolver, dgv);
             if (method == "BFS")
             {
-                BFSSolver(dgv);
+                BFSSolver(dgv, pathTracker);
             }
             else
             {
-                DFSSolver(dgv);
+                DFSSolver(dgv, pathTracker);
             }
         }
 
-        public void BFSSolver(DataGridView dgv)
+        // -------------------------[BFS ALGORITHM]----------------------------------
+        public void BFSSolver(DataGridView dgv, List<string> pathTracker)
         {
-            int[] copy = new int[2];
-            copy[0] = startIndex[0];
-            startRow = startIndex[0];
-            copy[1] = startIndex[1];
-            startCol = startIndex[1];
-            queueToVisit.Enqueue(copy);
-            
-            dgv[startCol, startRow].Style.BackColor = GetColor(adj[startIndex[0]][startIndex[1]]);
+            queueToVisit.Enqueue(startIndex);
+            dgv[startIndex[1], startIndex[0]].Style.BackColor = GetColor(adj[startIndex[0]][startIndex[1]]);
             dgv.Refresh();
             Thread.Sleep(700);
             adj[startIndex[0]][startIndex[1]]++;
-            
-            int[] currentIndex;
+            findPathBFS(startIndex, dgv, pathTracker);
+        }
+
+        public void findPathBFS(int[] currentIndex, DataGridView dgv, List<string> pathTracker)
+        {
+            if (treasureCount != 0)
+            {
+                trackBFS(visitNeighbor(currentIndex[0], currentIndex[1]), dgv, pathTracker);
+            }
+            foreach (string s in trackPath)
+            {
+                pathTracker.Add(s);
+            }
+        }
+
+        public void trackBFS(int[] currentIndex, DataGridView dgv, List<string> pathTracker)
+        {
             while (queueToVisit.Count != 0 && treasureCount != 0)
             {
                 currentIndex = queueToVisit.Dequeue();
@@ -66,52 +75,19 @@ namespace ChumBucketProject
                 {
                     if (isLeft)
                     {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1]+1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek bawah
-                        if (adj[currentIndex[0]+1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
+                        checkRight(currentIndex, dgv);
+                        checkDown(currentIndex, dgv);
                     }
                     else if (isRight)
                     {
-                        // cek bawah
-                        if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek kiri
-                        if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
+                        checkDown(currentIndex, dgv);
+                        checkLeft(currentIndex, dgv);
                     }
-
                     else
                     {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek bawah
-                        if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek kiri
-                        if (adj[currentIndex[0]][currentIndex[1]-1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
+                        checkRight(currentIndex, dgv);
+                        checkDown(currentIndex, dgv);
+                        checkLeft(currentIndex, dgv);
                     }
                 }
 
@@ -119,54 +95,19 @@ namespace ChumBucketProject
                 {
                     if (isLeft)
                     {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek atas
-                        if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
+                        checkRight(currentIndex, dgv);
+                        checkUp(currentIndex, dgv);
                     }
                     else if (isRight)
                     {
-                        // cek kiri
-                        if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-
-                        // cek atas
-                        if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
-
+                        checkLeft(currentIndex, dgv);
+                        checkUp(currentIndex, dgv);
                     }
-
                     else
                     {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek kiri
-                        if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-
-                        // cek atas
-                        if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
-
+                        checkRight(currentIndex, dgv);
+                        checkLeft(currentIndex, dgv);
+                        checkUp(currentIndex, dgv);
                     }
                 }
 
@@ -174,273 +115,364 @@ namespace ChumBucketProject
                 {
                     if (isLeft)
                     {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek bawah
-                        if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek atas
-                        if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
+                        checkRight(currentIndex, dgv);
+                        checkDown(currentIndex, dgv);
+                        checkUp(currentIndex, dgv);
                     }
                     else if (isRight)
                     {
-                        // cek bawah
-                        if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek kiri
-                        if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-
-                        // cek atas
-                        if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
+                        checkDown(currentIndex, dgv);
+                        checkLeft(currentIndex, dgv);
+                        checkUp(currentIndex, dgv);
                     }
-
                     else
                     {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek bawah
-                        if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek kiri
-                        if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-
-                        // cek atas
-                        if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
+                        checkRight(currentIndex, dgv);
+                        checkDown(currentIndex, dgv);
+                        checkLeft(currentIndex, dgv);
+                        checkUp(currentIndex, dgv);
                     }
                 }
             }
         }
-        public void DFSSolver(DataGridView dgv)
-        {
-            int[] copy = new int[2];
-            copy[0] = startIndex[0];
-            copy[1] = startIndex[1];
-            queueToVisit.Enqueue(copy);
 
-            dgv[copy[1], copy[0]].Style.BackColor = GetColor(adj[startIndex[0]][startIndex[1]]);
+        // --------------------------------[DFS ALGORITHM]--------------------------------------
+        public void DFSSolver(DataGridView dgv, List<string> pathTracker)
+        {
+            queueToVisit.Enqueue(startIndex);
+            dgv[startIndex[1], startIndex[0]].Style.BackColor = GetColor(adj[startIndex[0]][startIndex[1]]);
             dgv.Refresh();
             Thread.Sleep(700);
             adj[startIndex[0]][startIndex[1]]++;
-
+            Stack<int[]> visitedIndex = new Stack<int[]>();
             int[] currentIndex;
             while (queueToVisit.Count != 0 && treasureCount != 0)
             {
                 currentIndex = queueToVisit.Dequeue();
-                checkPosition(currentIndex);
-
-                if (isTop)
+                visitedIndex.Push(currentIndex);
+                findPathDFS(currentIndex, dgv, pathTracker, visitedIndex);
+            }
+            while (queueToVisit.Count == 0 && treasureCount != 0)
+            {
+                //backtrack
+                currentIndex = visitedIndex.Pop();
+                dgv[visitedIndex.Peek()[1], visitedIndex.Peek()[0]].Style.BackColor = GetColor(adj[visitedIndex.Peek()[0]][visitedIndex.Peek()[1]]);
+                dgv.Refresh();
+                Thread.Sleep(700);
+                backtrackDFSHandler(currentIndex, visitedIndex);
+                currentIndex = visitedIndex.Peek();
+                findPathDFS(currentIndex, dgv, pathTracker, visitedIndex);
+            }
+            if (treasureCount == 0)
+            {
+                foreach (string s in trackPath)
                 {
-                    if (isLeft)
-                    {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek bawah
-                        else if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-                    }
-                    else if (isRight)
-                    {
-                        // cek bawah
-                        if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek kiri
-                        else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-                    }
-
-                    else
-                    {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek bawah
-                        else if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek kiri
-                        else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-                    }
-                }
-
-                else if (isBottom)
-                {
-                    if (isLeft)
-                    {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek atas
-                        else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
-                    }
-                    else if (isRight)
-                    {
-                        // cek kiri
-                        if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-
-                        // cek atas
-                        else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
-
-                    }
-
-                    else
-                    {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek kiri
-                        else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-
-                        // cek atas
-                        else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
-
-                    }
-                }
-
-                else
-                {
-                    if (isLeft)
-                    {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek bawah
-                        else if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek atas
-                        else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
-                    }
-                    else if (isRight)
-                    {
-                        // cek bawah
-                        if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek kiri
-                        else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-
-                        // cek atas
-                        else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
-                    }
-
-                    else
-                    {
-                        // cek kanan
-                        if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
-                        }
-
-                        // cek bawah
-                        else if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
-                        }
-
-                        // cek kiri
-                        else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
-                        }
-
-                        // cek atas
-                        else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
-                        {
-                            checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
-                        }
-                    }
+                    pathTracker.Add(s);
                 }
             }
         }
 
+        public void findPathDFS(int[] currentIndex, DataGridView dgv, List<string> pathTracker, Stack<int[]> visitedIndex)
+        {
+            checkPosition(currentIndex);
+
+            if (isTop)
+            {
+                if (isLeft)
+                {
+                    checkTopLeft(currentIndex, dgv);
+                }
+                else if (isRight)
+                {
+                    checkTopRight(currentIndex, dgv);
+                }
+                else
+                {
+                    checkTopMiddle(currentIndex, dgv);
+                }
+            }
+
+            else if (isBottom)
+            {
+                if (isLeft)
+                {
+                    checkBottomLeft(currentIndex, dgv);
+                }
+                else if (isRight)
+                {
+                    checkBottomRight(currentIndex, dgv);
+                }
+                else
+                {
+                    checkBottomMiddle(currentIndex, dgv);
+                }
+            }
+            else
+            {
+                if (isLeft)
+                {
+                    checkMiddleLeft(currentIndex, dgv);
+                }
+                else if (isRight)
+                {
+                    checkMiddleRight(currentIndex, dgv);
+                }
+                else
+                {
+                    checkMiddle(currentIndex, dgv);
+                }
+            }
+        }
+
+        public void backtrackDFSHandler(int[] currentIndex, Stack<int[]> visitedIndex)
+        {
+            if (currentIndex[1] > visitedIndex.Peek()[1])
+            {
+                trackPath.Add("Left");
+                nodeVisited++;
+            }
+            else if (currentIndex[1] < visitedIndex.Peek()[1])
+            {
+                trackPath.Add("Right");
+                nodeVisited++;
+            }
+            else if (currentIndex[0] > visitedIndex.Peek()[0])
+            {
+                trackPath.Add("Up");
+                nodeVisited++;
+            }
+            else if (currentIndex[0] < visitedIndex.Peek()[0])
+            {
+                trackPath.Add("Down");
+                nodeVisited++;
+            }
+        }
+
+        // ---------------------------[MATRIX CHECKER]---------------------------
+        // BFS Checker
+        public void checkRight(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
+            {
+                trackPath.Add("Right");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
+                nodeVisited++;
+            }
+        }
+
+        public void checkDown(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]+1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Down");
+                checkNeighbor(dgv, currentIndex[0]+1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+        public void checkLeft(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1]-1] == 1)
+            {
+                trackPath.Add("Left");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1]-1);
+                nodeVisited++;
+            }
+        }
+
+        public void checkUp(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]-1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Up");
+                checkNeighbor(dgv, currentIndex[0]-1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+        // DFS Checker
+        public void checkTopLeft(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
+            {
+                trackPath.Add("Right");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Down");
+                checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+        public void checkTopRight(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Down");
+                checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
+            {
+                trackPath.Add("Left");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
+                nodeVisited++;
+            }
+        }
+
+        public void checkTopMiddle(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
+            {
+                trackPath.Add("Right");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Down");
+                checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
+            {
+                trackPath.Add("Left");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
+                nodeVisited++;
+            }
+        }
+
+        public void checkBottomLeft(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
+            {
+                trackPath.Add("Right");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Up");
+                checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+        public void checkBottomRight(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
+            {
+                trackPath.Add("Left");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Up");
+                checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+        public void checkBottomMiddle(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
+            {
+                trackPath.Add("Right");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
+            {
+                trackPath.Add("Left");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1]-1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Up");
+                checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+        public void checkMiddleLeft(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
+            {
+                trackPath.Add("Right");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Down");
+                checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Up");
+                checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+        public void checkMiddleRight(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Down");
+                checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
+            {
+                trackPath.Add("Left");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Up");
+                checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+        public void checkMiddle(int[] currentIndex, DataGridView dgv)
+        {
+            if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
+            {
+                trackPath.Add("Right");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] + 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] + 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Down");
+                checkNeighbor(dgv, currentIndex[0] + 1, currentIndex[1]);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0]][currentIndex[1] - 1] == 1)
+            {
+                trackPath.Add("Left");
+                checkNeighbor(dgv, currentIndex[0], currentIndex[1] - 1);
+                nodeVisited++;
+            }
+            else if (adj[currentIndex[0] - 1][currentIndex[1]] == 1)
+            {
+                trackPath.Add("Up");
+                checkNeighbor(dgv, currentIndex[0] - 1, currentIndex[1]);
+                nodeVisited++;
+            }
+        }
+
+
+        // ---------------------------[NEIGHBORHOOD]---------------------------
         public void checkNeighbor(DataGridView dgv, int row, int col)
         {
             dgv[col, row].Style.BackColor = GetColor(adj[row][col]);
@@ -459,6 +491,7 @@ namespace ChumBucketProject
             return neighborIndex;
         }
 
+        // ---------------------------[UTILITIES]---------------------------
         public void checkTreasure(int row, int col)
         {
             if (path[row][col] == "T")
@@ -496,7 +529,6 @@ namespace ChumBucketProject
                 isRight = true;
             }
         }
-
 
         public void helper(TextReader readerSolver, DataGridView dgv)
         {

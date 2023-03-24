@@ -20,6 +20,7 @@ namespace ChumBucketProject
         public bool isSolvedBFS = false;
         public bool isSolvedDFS = false;
         public int numOfTreasure = 0;
+        public List<string> pathTracker = new List<string>();
 
         public Form1()
         {
@@ -198,7 +199,7 @@ namespace ChumBucketProject
                     }
                     isSolvedBFS = true;
                     isSolvedDFS = false;
-                    appHandler.solveMap(method, readerSolver, dataGridView1);
+                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker);
                 }
 
                 else if (method == "DFS" && isSolvedDFS)
@@ -213,7 +214,11 @@ namespace ChumBucketProject
                     }
                     isSolvedBFS = false;
                     isSolvedDFS = true;
-                    appHandler.solveMap(method, readerSolver, dataGridView1);
+                    appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker);
+                }
+                foreach (string c in pathTracker)
+                {
+                    textBox1.Text += c + " ";
                 }
             }
             else
