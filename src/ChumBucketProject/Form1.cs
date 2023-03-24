@@ -17,8 +17,7 @@ namespace ChumBucketProject
         private AppHandler appHandler;
         private TextReader readerSolver;
         private bool isValid = false;
-        private bool isSolvedBFS = false;
-        private bool isSolvedDFS = false;
+        private bool isSolved = false;
         private bool showSteps = false;
         private bool showTSP = false;
         private int numOfTreasure = 0;
@@ -45,18 +44,16 @@ namespace ChumBucketProject
             dataGridView1.ColumnHeadersVisible = false;
             dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
             dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None;
-
-            //dataGridView1.SelectionMode = DataGridViewSelectionMode.CellSelect;
             dataGridView1.DefaultCellStyle.SelectionBackColor = Color.DarkBlue;
 
-            //resctricting user to change the grid except the content
+            // batasan user
             dataGridView1.AllowUserToResizeRows = false;
             dataGridView1.AllowUserToAddRows = false;
             dataGridView1.AllowUserToDeleteRows = false;
             dataGridView1.AllowUserToOrderColumns = false;
             dataGridView1.AllowUserToResizeColumns = false;
 
-            //setting grid size
+            // set ukuran grid
             dataGridView1.ColumnCount = numCols;
             dataGridView1.Rows.Add(numRows);
 
@@ -171,8 +168,7 @@ namespace ChumBucketProject
                 }
                 InitializeGrid(numRows, numCols, charMap);
             }
-            isSolvedBFS = false;
-            isSolvedDFS = false;
+            isSolved = false;
             pictureBox1.Dispose();
         }
         public void clearBackColor()
@@ -207,18 +203,13 @@ namespace ChumBucketProject
                 {
                     method = "DFS";
                 }
-                if (method == "BFS" && isSolvedBFS)
+                if (method == "BFS" && isSolved)
                 {
                     appHandler.ShowMessageBoxSolved();
                 }
-                else if (method == "BFS" && !isSolvedBFS)
+                else if (method == "BFS" && !isSolved)
                 {
-                    if (isSolvedDFS)
-                    {
-                        clearBackColor();
-                    }
-                    isSolvedBFS = true;
-                    isSolvedDFS = false;
+                    isSolved = true;
                     Stopwatch sw = Stopwatch.StartNew();
                     appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker, showSteps, showTSP);
                     sw.Stop();
@@ -228,18 +219,13 @@ namespace ChumBucketProject
                     label6.Text = "Steps: " + appHandler.getSteps();
                 }
 
-                else if (method == "DFS" && isSolvedDFS)
+                else if (method == "DFS" && isSolved)
                 {
                     appHandler.ShowMessageBoxSolved();
                 }
-                else if (method == "DFS" && !isSolvedDFS)
+                else if (method == "DFS" && !isSolved)
                 {
-                    if (isSolvedBFS)
-                    {
-                        clearBackColor();
-                    }
-                    isSolvedBFS = false;
-                    isSolvedDFS = true;
+                    isSolved = true;
                     Stopwatch sw = Stopwatch.StartNew();
                     appHandler.solveMap(method, readerSolver, dataGridView1, pathTracker, showSteps, showTSP);
                     sw.Stop();

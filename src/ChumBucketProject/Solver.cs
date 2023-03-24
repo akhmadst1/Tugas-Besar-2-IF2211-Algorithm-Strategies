@@ -50,6 +50,7 @@ namespace ChumBucketProject
         }
 
         // -------------------------[BFS ALGORITHM]----------------------------------
+        // pengecekan dengan algoritma BFS (jika button BFS di-check)
         public void BFSSolver(DataGridView dgv, List<string> pathTracker)
         {
             for (int i = 0; i < numRows; i++)
@@ -176,6 +177,7 @@ namespace ChumBucketProject
         }
 
         // --------------------------------[DFS ALGORITHM]--------------------------------------
+        // pengecekan dengan algoritma BFS (jika button DFS di-check)
         public void DFSSolver(DataGridView dgv, List<string> pathTracker)
         {
             queueToVisit.Enqueue(startIndex);
@@ -321,7 +323,7 @@ namespace ChumBucketProject
         }
 
         // ---------------------------[MATRIX CHECKER]---------------------------
-        // BFS Checker
+        // BFS Checker Matrix
         public void checkRight(int[] currentIndex, DataGridView dgv, List<string> oldPath)
         {
             if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
@@ -402,7 +404,7 @@ namespace ChumBucketProject
             }
         }
 
-        // DFS Checker
+        // DFS Checker Matrix
         public void checkTopLeft(int[] currentIndex, DataGridView dgv)
         {
             if (adj[currentIndex[0]][currentIndex[1] + 1] == 1)
@@ -583,13 +585,8 @@ namespace ChumBucketProject
             }
         }
 
-        public int arrToKey(int[] index)
-        {
-            return (index[0]*numCols + index[1]);
-        }
-
-
         // ---------------------------[NEIGHBORHOOD]---------------------------
+        // method untuk mengecek status yang terkait dengan ketetanggaan
         public void checkNeighbor(DataGridView dgv, int row, int col)
         {
             dgv[col, row].Style.BackColor = GetColor(adj[row][col]);
@@ -612,6 +609,12 @@ namespace ChumBucketProject
         }
 
         // ---------------------------[UTILITIES]---------------------------
+        // beberapa method pembantu
+        public int arrToKey(int[] index)
+        {
+            return (index[0]*numCols + index[1]);
+        }
+
         public void checkTreasure(int row, int col)
         {
             if (path[row][col] == "T")

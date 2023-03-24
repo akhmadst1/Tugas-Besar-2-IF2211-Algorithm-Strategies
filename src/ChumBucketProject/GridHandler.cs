@@ -11,7 +11,7 @@ namespace ChumBucketProject
         {
             Grid = dataGridView;
         }
-
+        // handling datagridview
         public void PrintGrid(int row, int column, char map)
         {
             if (map == 'K')

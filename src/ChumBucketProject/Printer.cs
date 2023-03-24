@@ -9,7 +9,7 @@ namespace ChumBucketProject
         {
             gh = grid;
         }
-
+        // print input ke grid
         public void PrintPathGrid(Game game, int numRows, int numCols)
         {
             for (int i = 0; i < numRows; i++)
